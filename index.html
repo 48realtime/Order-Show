@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setoran Orderan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .grad-text {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(to right, #ffffff, #a3a3a3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-gold {
+            background: #171717;
+            border: 1px solid #262626;
+            transition: all 0.3s ease;
+        }
+        .card-gold:hover {
+            border-color: #d4af37;
+        }
+        input[type="checkbox"] {
+            accent-color: #d4af37;
+        }
+        .btn-order {
+            background: linear-gradient(45deg, #1a1a1a, #333333);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+        }
+        .btn-order:hover {
+            background: #d4af37;
+            color: #000;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl grad-text mb-2">SETORAN ORDERAN</h1>
+            <p class="text-gray-500 uppercase tracking-widest text-sm">RealTime48</p>
+        </header>
+
+        <!-- Panduan Penggunaan -->
+        <section class="mb-8 p-6 card-gold rounded-lg text-sm leading-relaxed">
+            <h2 class="text-[#d4af37] font-semibold mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Panduan Order Show
+            </h2>
+            <ul class="list-disc list-inside space-y-1 text-gray-400">
+                <li>Tulislah nama show yang ingin di order.</li>
+                <li>Jika ingin memilih lebih dari satu show/tanggal, wajib mengisi kembali nama,tgl serta kriteria show dan klik <strong>"Tambah Show"</strong></li>
+                <li>Anda hanya perlu menulis kembali nama show, tanggal serta kriteria show dan mengklik Tambah Show untuk memilih beberapa show</li>
+                <li>Klik Konfirmasi agar dapat mengirim pesanan ke admin yang nantinya akan diberikan qris</li>
+                <li>Total harga akan otomatis terhitung di bagian bawah.</li>
+            </ul>
+        </section>
+
+   
+            <!-- Alternatif Order -->
+            <div class="mt-8">
+                <h3 class="text-xl font-semibold border-b border-gray-800 pb-2 mb-4">Show Order</h3>
+                <div class="card-gold p-6 rounded-lg space-y-4">
+                    <p class="text-xs text-gray-500 italic">Tulis Nama Show Yang Diinginkan (isi berulang kolom dibawah jika ingin membeli beberapa show dan klik tambah show).</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="alt-name" placeholder="Nama Show (contoh: Renai Kinshi Jourei)" class="bg-black border border-gray-700 rounded px-3 py-2">
+                        <div class="flex gap-2">
+                            <select id="alt-kriteria" class="bg-black border border-gray-700 rounded px-3 py-2 flex-1">
+                                <option value="6000">Reguler (6.000)</option>
+                                <option value="8000">STS Member (8.000)</option>
+                            </select>
+                            <input type="number" id="alt-tgl" placeholder="Tgl" class="bg-black border border-gray-700 rounded px-3 py-2 w-20 text-center">
+                        </div>
+                    </div>
+                    <button id="add-alt" class="text-xs text-[#d4af37] border border-[#d4af37] px-3 py-1 rounded hover:bg-[#d4af37] hover:text-black transition">
+                        + Tambah Show
+                    </button>
+                    <div id="alt-list" class="space-y-2 mt-2"></div>
+                </div>
+            </div>
+
+            <!-- Footer Kalkulator & Submit -->
+            <div class="mt-12 p-6 bg-[#111] rounded-xl border border-gray-800 sticky bottom-4 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Pembayaran</p>
+                        <h4 id="total-display" class="text-2xl font-bold text-[#d4af37]">IDR 0</h4>
+                    </div>
+                    <button onclick="sendToWhatsApp()" class="btn-order px-8 py-3 rounded-full font-bold transition flex items-center gap-2">
+                        Konfirmasi Order
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const altOrders = [];
+        const whatsappNumber = "+6288809048431";
+
+        // Listeners for calculator
+        document.addEventListener('input', calculateTotal);
+        
+        document.getElementById('add-alt').addEventListener('click', () => {
+            const name = document.getElementById('alt-name').value;
+            const kriteriaVal = document.getElementById('alt-kriteria').value;
+            const kriteriaLabel = document.getElementById('alt-kriteria').options[document.getElementById('alt-kriteria').selectedIndex].text.split(' ')[0];
+            const tgl = document.getElementById('alt-tgl').value;
+
+            if (name && tgl) {
+                altOrders.push({ name, kriteriaVal: parseInt(kriteriaVal), kriteriaLabel, tgl });
+                renderAltList();
+                calculateTotal();
+                document.getElementById('alt-name').value = '';
+                document.getElementById('alt-tgl').value = '';
+            }
+        });
+
+        function renderAltList() {
+            const container = document.getElementById('alt-list');
+            container.innerHTML = altOrders.map((item, index) => `
+                <div class="flex justify-between items-center bg-gray-900 p-2 rounded text-sm">
+                    <span>${item.name} (${item.kriteriaLabel}) - Tgl: ${item.tgl}</span>
+                    <button onclick="removeAlt(${index})" class="text-red-500 font-bold px-2">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeAlt(index) {
+            altOrders.splice(index, 1);
+            renderAltList();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            
+            // From Checkboxes
+            document.querySelectorAll('.show-checkbox:checked').forEach(cb => {
+                const parent = cb.closest('.show-item');
+                const price = parseInt(parent.querySelector('.kriteria-select').value);
+                total += price;
+            });
+
+            // From Alternatif
+            altOrders.forEach(item => {
+                total += item.kriteriaVal;
+            });
+
+            document.getElementById('total-display').innerText = `IDR ${total.toLocaleString('id-ID')}`;
+        }
+
+        function sendToWhatsApp() {
+            let orderSummary = {}; // To handle same show name with multiple dates
+
+            // 1. Collect from standard checklist
+            document.querySelectorAll('.show-checkbox:checked').forEach(cb => {
+                const parent = cb.closest('.show-item');
+                const name = cb.getAttribute('data-name');
+                const tgl = parent.querySelector('.tgl-input').value || "?";
+                const kriteria = parent.querySelector('.kriteria-select').options[parent.querySelector('.kriteria-select').selectedIndex].getAttribute('data-label');
+                const key = `${name} (${kriteria})`;
+
+                if (!orderSummary[key]) orderSummary[key] = [];
+                orderSummary[key].push(tgl);
+            });
+
+            // 2. Collect from Alternative
+            altOrders.forEach(item => {
+                const key = `${item.name} (${item.kriteriaLabel})`;
+                if (!orderSummary[key]) orderSummary[key] = [];
+                orderSummary[key].push(item.tgl);
+            });
+
+            if (Object.keys(orderSummary).length === 0) {
+                alert("Mohon pilih minimal satu show!");
+                return;
+            }
+
+            // 3. Format Message
+            let message = "*SETORAN ORDERAN*\n\n";
+            let totalOrder = 0;
+
+            // Sorting keys
+            const sortedKeys = Object.keys(orderSummary).sort();
+
+            sortedKeys.forEach(key => {
+                // Remove duplicate dates and sort
+                const dates = [...new Set(orderSummary[key])].sort((a, b) => a - b);
+                message += `🎭 *${key}*\n📅 Tanggal: ${dates.join(', ')}\n\n`;
+                
+                // Calculate total for message validation
+                const isSTS = key.includes("STS");
+                totalOrder += dates.length * (isSTS ? 8000 : 6000);
+            });
+
+            message += `--------------------------\n`;
+            message += `*TOTAL TAGIHAN: IDR ${totalOrder.toLocaleString('id-ID')}*`;
+
+            const encodedMsg = encodeURIComponent(message);
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMsg}`, '_blank');
+        }
+    </script>
+</body>
+</html>
