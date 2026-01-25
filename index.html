@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Show RealTime</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e94560;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: #e94560;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+        }
+
+        .cosmic-btn {
+            background: linear-gradient(45deg, #e94560, #950740);
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-btn:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.6);
+        }
+
+        #guideModal, #cartSidebar {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hidden-show { display: none !important; }
+    </style>
+</head>
+<body class="pb-20">
+    <!-- Star Background -->
+    <div id="starfield" class="fixed inset-0 pointer-events-none -z-10"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 glass-card px-6 py-4 mb-8 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            <h1 class="text-xl font-bold tracking-wider uppercase text-white">Order Show <span class="text-pink-500">RealTime</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="toggleGuide()" class="p-2 hover:bg-white/10 rounded-full transition-colors" title="Panduan Order">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            <button onclick="toggleCart()" class="relative p-2 hover:bg-white/10 rounded-full transition-colors" title="Keranjang Saya">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span id="cartCount" class="absolute top-0 right-0 bg-pink-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#16213e]">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        <!-- Show Grid -->
+        <div id="showGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Content will be injected by JS -->
+        </div>
+    </main>
+
+    <!-- Guide Modal -->
+    <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 hidden opacity-0">
+        <div class="glass-card max-w-md w-full p-8 rounded-2xl text-white shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-pink-400">🚀 Panduan Pemesanan</h2>
+            <ul class="space-y-4 text-sm leading-relaxed mb-6">
+                <li class="flex gap-3">
+                    <span class="text-pink-500 font-bold">1.</span>
+                    <span>Pilih jadwal show yang tersedia di daftar. Show yang sudah lewat akan otomatis hilang dari daftar.</span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="text-pink-500 font-bold">2.</span>
+                    <span>Klik tombol <strong class="text-pink-400">"Masukkan Keranjang"</strong>. Anda bisa memilih beberapa show sekaligus.</span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="text-pink-500 font-bold">3.</span>
+                    <span>Buka ikon keranjang di pojok kanan atas untuk meninjau pesanan Anda.</span>
+                </li>
+                <li class="flex gap-3">
+                    <span class="text-pink-500 font-bold">4.</span>
+                    <span>Klik <strong class="text-pink-400">"Konfirmasi via WhatsApp"</strong> untuk mengirim data pesanan ke admin kami.</span>
+                </li>
+            </ul>
+            <button onclick="toggleGuide()" class="w-full py-3 cosmic-btn rounded-xl font-bold uppercase tracking-widest text-sm">Mulai Order</button>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 z-50 bg-[#0f3460] shadow-2xl translate-x-full border-l border-white/10 flex flex-col">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-white uppercase tracking-tighter">🚀 Keranjang Show</h2>
+            <button onclick="toggleCart()" class="text-white hover:text-pink-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="cartItems" class="flex-grow overflow-y-auto p-6 space-y-4">
+            <!-- Cart items injected here -->
+            <p id="emptyMsg" class="text-gray-400 text-center italic mt-10">Keranjang masih kosong...</p>
+        </div>
+        <div class="p-6 bg-black/20 border-t border-white/10">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-gray-300">Total Harga:</span>
+                <span id="cartTotal" class="text-2xl font-bold text-pink-500">Rp 0</span>
+            </div>
+            <button onclick="confirmOrder()" class="w-full py-4 cosmic-btn rounded-xl text-white font-bold flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.224-3.92c1.589.944 3.32 1.442 5.087 1.443 5.424 0 9.839-4.416 9.842-9.841.002-2.628-1.024-5.1-2.887-6.963-1.864-1.864-4.332-2.887-6.963-2.889-5.424 0-9.839 4.417-9.842 9.843 0 1.761.472 3.473 1.365 4.981l-.9 3.287 3.364-.883zm12.358-11.884c.147-.073.303-.11.459-.11.23 0 .445.1.589.266.14.161.218.373.218.591 0 .23-.08.449-.227.618l-.547.625-1.071 1.22c-.114.131-.242.251-.382.359l-.027.022c-1.282.97-2.618 1.64-3.992 2.155-.386.145-.772.28-1.157.399l-.055.016c-.22.062-.44.116-.659.163l-.044.01c-.131.027-.262.052-.394.075-.05.008-.101.016-.151.024-.268.041-.537.072-.806.094l-.053.004c-.312.022-.625.034-.938.034-.847 0-1.696-.08-2.541-.24l-.123-.024c-.17-.033-.34-.07-.51-.11l-.106-.026c-.309-.074-.617-.16-.924-.257l-.15-.049c-.27-.089-.538-.186-.805-.294l-.133-.055c-.24-.1-.479-.21-.718-.328l-.138-.071c-.22-.112-.44-.233-.659-.364l-.143-.088c-.198-.124-.395-.257-.591-.4l-.11-.082c-.23-.173-.456-.359-.68-.557l-.066-.059c-.223-.2-.442-.413-.655-.638l-.056-.059c-.208-.225-.409-.46-.605-.708l-.048-.061c-.183-.231-.36-.474-.531-.728l-.039-.061c-.16-.251-.313-.513-.458-.785l-.014-.029c-.14-.265-.268-.541-.383-.827-.015-.038-.03-.075-.045-.113l-.013-.037c-.112-.321-.205-.658-.278-1.01-.01-.053-.018-.106-.027-.16-.073-.432-.109-.884-.109-1.347 0-1.291.288-2.516.853-3.639l.011-.02c.038-.073.076-.146.116-.217l.019-.033c.061-.106.126-.209.192-.31l.012-.019c.1-.15.207-.294.318-.432l.026-.03c.125-.152.257-.298.395-.436l.044-.043c.164-.158.337-.308.516-.45l.03-.022c.189-.148.386-.288.591-.418l.061-.038c.216-.134.441-.258.673-.371l.034-.016c.245-.119.499-.226.759-.321l.07-.025c.34-.124.693-.228 1.055-.31l.136-.03c.33-.074.67-.132 1.014-.173l.23-.026c.321-.035.648-.057.979-.066l.244-.006c.365-.008.735-.003 1.107.016l.169.01c.433.024.87.067 1.309.13l.036.005c.42.061.84.144 1.258.249l.065.017c.394.099.787.218 1.178.358l.081.03c.367.132.731.284 1.092.453l.113.053c.334.159.664.336.989.53l.142.086c.294.178.583.372.868.58l.113.084c.264.195.522.404.774.624l.09.08c.23.204.455.421.674.649l.047.051c.214.221.423.454.624.696l.024.03c.184.221.362.453.533.693l.04.057c.15.215.295.438.432.668l.01.018z" />
+                </svg>
+                Konfirmasi via WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data Show
+        const SHOWS = [
+            { id: 1, title: "Sambil Menggandeng Erat Tanganku", date: "2026-01-25", time: "14:00", lineup: "Alya, Amanda, Delynn, Elin, Ella, Fritzy, Lulu, Lyn, Marsha, Nala, Oline, Raisha", price: 6000 },
+            { id: 2, title: "Pertaruhan Cinta", date: "2026-01-25", time: "19:00", lineup: "Christy, Fiony, Freya, Gita, Gracie, Greesel, Jessi, Lana, Lia, Marsha, Muthe, Olla", price: 6000 },
+            { id: 3, title: "Cara Meminum Ramune", date: "2026-01-29", time: "19:00", lineup: "Anindya, Daisy, Danella, Delynn, Ella, Freya, Gendis, Gita, Greesel, Indah, Lia, Lulu, Muthe, Nachia, Oniel, Ribka", price: 6000 },
+            { id: 4, title: "Pertaruhan Cinta", date: "2026-01-30", time: "19:00", lineup: "Alya, Amanda, Cynthia, Elin, Fiony, Freya, Gendis, Kathrina, Lana, Lyn, Olla, Raisha", price: 6000 },
+            { id: 5, title: "Sambil Menggandeng Erat Tanganku", date: "2026-01-31", time: "16:00", lineup: "Aralie, Cathy, Erine, Gracie, Kimmy, Lia, Lily, Lyn, Marsha, Nachia, Oline, Raisha", price: 6000 },
+            { id: 6, title: "Cara Meminum Ramune", date: "2026-02-01", time: "16:00", lineup: "Chelsea, Christy, Danella, Delynn, Erine, Fritzy, Gita, Gracie, Jessi, Levi, Lily, Michie, Nayla, Oline, Oniel, Trisha", price: 6000 }
+        ];
+
+        let cart = [];
+        const WHATSAPP_NUMBER = "6288809048431";
+
+        // Initializer
+        window.onload = () => {
+            createStars();
+            renderShows();
+            updateCartUI();
+            
+            // Show guide on first visit
+            if(!localStorage.getItem('guideSeen')) {
+                toggleGuide();
+            }
+        };
+
+        function createStars() {
+            const starfield = document.getElementById('starfield');
+            for(let i=0; i<150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3 + 'px';
+                star.style.width = size;
+                star.style.height = size;
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                starfield.appendChild(star);
+            }
+        }
+
+        function renderShows() {
+            const grid = document.getElementById('showGrid');
+            const now = new Date();
+            
+            grid.innerHTML = '';
+            
+            SHOWS.forEach(show => {
+                const showDate = new Date(`${show.date}T${show.time}`);
+                if (showDate < now) return; // Automatic delete if date passed
+
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full';
+                card.innerHTML = `
+                    <div class="mb-4">
+                        <span class="text-[10px] text-pink-400 font-bold uppercase tracking-widest border border-pink-500/30 px-2 py-1 rounded">Theater Show</span>
+                        <h3 class="text-xl font-bold text-white mt-3 leading-tight">${show.title}</h3>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-300 mb-6 flex-grow">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            ${formatDate(show.date)}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            ${show.time} WIB
+                        </div>
+                        <div class="pt-2 border-t border-white/5 mt-2">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Full Line Up</p>
+                            <p class="text-xs italic leading-relaxed text-gray-400">${show.lineup}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-auto">
+                        <div>
+                            <p class="text-[10px] text-gray-400">Price per show</p>
+                            <p class="text-lg font-bold text-white">Rp ${show.price.toLocaleString()}</p>
+                        </div>
+                        <button onclick="addToCart(${show.id})" class="cosmic-btn px-4 py-2 rounded-lg text-white text-xs font-bold hover:scale-105 active:scale-95">
+                            TAMBAH
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function formatDate(dateStr) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('id-ID', options);
+        }
+
+        // Cart Logic
+        function addToCart(showId) {
+            const show = SHOWS.find(s => s.id === showId);
+            if(cart.some(item => item.id === showId)) {
+                showToast("Show sudah ada di keranjang!");
+                return;
+            }
+            cart.push(show);
+            updateCartUI();
+            showToast("Berhasil ditambahkan ke keranjang!");
+        }
+
+        function removeFromCart(showId) {
+            cart = cart.filter(item => item.id !== showId);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+            const emptyMsg = document.getElementById('emptyMsg');
+            
+            cartCount.innerText = cart.length;
+            
+            if(cart.length === 0) {
+                cartItems.innerHTML = '<p id="emptyMsg" class="text-gray-400 text-center italic mt-10">Keranjang masih kosong...</p>';
+                cartTotal.innerText = 'Rp 0';
+                return;
+            }
+
+            let total = 0;
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.className = 'glass-card p-4 rounded-xl flex justify-between items-center animate-fade-in';
+                div.innerHTML = `
+                    <div>
+                        <h4 class="text-white font-bold text-sm">${item.title}</h4>
+                        <p class="text-[10px] text-pink-400">${item.date} | ${item.time} WIB</p>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                `;
+                cartItems.appendChild(div);
+            });
+            cartTotal.innerText = `Rp ${total.toLocaleString()}`;
+        }
+
+        function confirmOrder() {
+            if(cart.length === 0) {
+                showToast("Pilih show terlebih dahulu!");
+                return;
+            }
+
+            let message = "*KONFIRMASI PESANAN SHOW JKT48*\n\n";
+            cart.forEach((item, index) => {
+                message += `${index + 1}. *${item.title}*\n`;
+                message += `📅 Tanggal: ${item.date}\n`;
+                message += `🕒 Jam: ${item.time} WIB\n`;
+                message += `💸 Harga: Rp ${item.price}\n\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            message += `*Total Pembayaran: Rp ${total.toLocaleString()}*\n\n`;
+            message += "_Mohon instruksi selanjutnya untuk pembayaran._";
+
+            const encodedMsg = encodeURIComponent(message);
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`, '_blank');
+        }
+
+        // UI Handlers
+        function toggleGuide() {
+            const modal = document.getElementById('guideModal');
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 400);
+                localStorage.setItem('guideSeen', 'true');
+            }
+        }
+
+        function toggleCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            if(sidebar.classList.contains('translate-x-full')) {
+                sidebar.classList.remove('translate-x-full');
+            } else {
+                sidebar.classList.add('translate-x-full');
+            }
+        }
+
+        function showToast(text) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg z-50 animate-bounce';
+            toast.innerText = text;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+    </script>
+</body>
+</html>
