@@ -3,16 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Show RealTime</title>
+    <title>Order Show RealTime - Admin Friendly</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: #050505;
             color: #e94560;
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Cosmic Container */
+        #cosmic-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a1a 100%);
+            overflow: hidden;
         }
 
         .star {
@@ -25,20 +35,40 @@
 
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.2); }
+            50% { opacity: 1; transform: scale(1.4); }
+        }
+
+        /* Planet Styles */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: 0.6;
+            animation: float var(--speed) linear infinite;
+        }
+
+        @keyframes float {
+            from { transform: translate(0, 0) rotate(0deg); }
+            to { transform: translate(var(--moveX), var(--moveY)) rotate(360deg); }
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .glass-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             border-color: #e94560;
-            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.25);
+        }
+
+        .birthday-badge {
+            background: linear-gradient(90deg, #ff0080, #ff8c00);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.4);
         }
 
         .cosmic-btn {
@@ -48,36 +78,62 @@
 
         .cosmic-btn:hover {
             filter: brightness(1.2);
-            box-shadow: 0 0 15px rgba(233, 69, 96, 0.6);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
         }
 
-        #guideModal, #cartSidebar {
+        .image-container {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.1), rgba(15, 52, 96, 0.4));
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #guideModal, #cartSidebar, #paymentModal {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .hidden-show { display: none !important; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
     </style>
 </head>
 <body class="pb-20">
-    <!-- Star Background -->
-    <div id="starfield" class="fixed inset-0 pointer-events-none -z-10"></div>
+    <!-- Cosmic Background Element -->
+    <div id="cosmic-bg"></div>
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 glass-card px-6 py-4 mb-8 flex justify-between items-center">
+    <header class="sticky top-0 z-40 glass-card px-6 py-4 mb-8 flex justify-between items-center mx-4 mt-4 rounded-2xl">
         <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-            </svg>
+            <div class="bg-pink-600/20 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+            </div>
             <h1 class="text-xl font-bold tracking-wider uppercase text-white">Order Show <span class="text-pink-500">RealTime</span></h1>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="toggleGuide()" class="p-2 hover:bg-white/10 rounded-full transition-colors" title="Panduan Order">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button onclick="toggleGuide()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </button>
-            <button onclick="toggleCart()" class="relative p-2 hover:bg-white/10 rounded-full transition-colors" title="Keranjang Saya">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button onclick="toggleCart()" class="relative p-2 hover:bg-white/10 rounded-full transition-colors text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 <span id="cartCount" class="absolute top-0 right-0 bg-pink-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-[#16213e]">0</span>
@@ -86,42 +142,65 @@
     </header>
 
     <main class="container mx-auto px-4">
-        <!-- Show Grid -->
         <div id="showGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Content will be injected by JS -->
+            <!-- Items injected by JS -->
+        </div>
+        <div id="noShowsMsg" class="hidden text-center py-20 animate-fade-in">
+            <p class="text-gray-400 italic">Tidak ada jadwal show aktif saat ini.</p>
         </div>
     </main>
 
-    <!-- Guide Modal -->
+    <!-- Modal Panduan -->
     <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 hidden opacity-0">
         <div class="glass-card max-w-md w-full p-8 rounded-2xl text-white shadow-2xl">
             <h2 class="text-2xl font-bold mb-4 text-pink-400">🚀 Panduan Pemesanan</h2>
             <ul class="space-y-4 text-sm leading-relaxed mb-6">
                 <li class="flex gap-3">
                     <span class="text-pink-500 font-bold">1.</span>
-                    <span>Pilih jadwal show yang tersedia di daftar. Show yang sudah lewat akan otomatis hilang dari daftar.</span>
+                    <span>Pilih jadwal show yang tersedia di daftar.</span>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-pink-500 font-bold">2.</span>
-                    <span>Klik tombol <strong class="text-pink-400">"Masukkan Keranjang"</strong>. Anda bisa memilih beberapa show sekaligus.</span>
+                    <span>Klik <strong class="text-pink-400">"TAMBAH"</strong> untuk memasukkan ke keranjang.</span>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-pink-500 font-bold">3.</span>
-                    <span>Buka ikon keranjang di pojok kanan atas untuk meninjau pesanan Anda.</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="text-pink-500 font-bold">4.</span>
-                    <span>Klik <strong class="text-pink-400">"Konfirmasi via WhatsApp"</strong> untuk mengirim data pesanan ke admin kami.</span>
+                    <span>Selesaikan pembayaran QRIS dan konfirmasi via WhatsApp.</span>
                 </li>
             </ul>
             <button onclick="toggleGuide()" class="w-full py-3 cosmic-btn rounded-xl font-bold uppercase tracking-widest text-sm">Mulai Order</button>
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 z-50 bg-[#0f3460] shadow-2xl translate-x-full border-l border-white/10 flex flex-col">
+    <!-- Modal Pembayaran (QRIS) -->
+    <div id="paymentModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/95 hidden opacity-0">
+        <div class="glass-card max-w-sm w-full p-6 rounded-3xl text-center text-white shadow-2xl">
+            <h2 class="text-xl font-bold mb-2">QRIS PEMBAYARAN</h2>
+            <p class="text-xs text-gray-400 mb-6 uppercase tracking-widest font-semibold italic">Silahkan scan dan simpan bukti transfer</p>
+            
+            <div class="bg-white p-4 rounded-2xl mb-6 shadow-[0_0_20px_rgba(255,255,255,0.15)] overflow-hidden">
+                <img id="qrisImage" src="https://chemical-ivory-ub9of2v4h6.edgeone.app/IMG-20251204-WA0118(6).jpg" alt="QRIS Pembayaran" class="w-full rounded-lg transition-transform hover:scale-110">
+            </div>
+
+            <div class="bg-black/40 rounded-xl p-4 mb-6 border border-white/10">
+                <p class="text-xs text-gray-400 mb-1">Total yang harus dibayar:</p>
+                <p id="paymentTotal" class="text-2xl font-bold text-pink-500 tracking-tight">Rp 0</p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="redirectToWA()" class="w-full py-4 cosmic-btn rounded-2xl text-white font-bold flex items-center justify-center gap-2 shadow-xl">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.512-2.961-2.628-.086-.117-.718-.953-.718-1.816 0-.862.453-1.287.614-1.455.161-.168.346-.21.461-.21.116 0 .23 0 .331.005.106.005.25.013.392.353.144.348.49.1.597.512.107.412.359.824.107 1.332-.125.252-.252.41-.359.531-.107.121-.215.241-.309.346-.103.116-.211.242-.091.448.12.206.535.882 1.146 1.426.787.699 1.448.916 1.654 1.019.206.103.328.086.448-.052.12-.137.517-.601.655-.807.138-.206.276-.172.46-.103.184.069 1.166.551 1.367.652.202.103.336.155.387.241.052.086.052.5-.092.905z"/></svg>
+                    Sudah Bayar, Lanjut WA
+                </button>
+                <button onclick="togglePayment()" class="text-gray-400 text-sm py-2 hover:text-white transition-colors uppercase tracking-widest font-bold">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Keranjang -->
+    <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 z-50 bg-[#0a0a1a] shadow-2xl translate-x-full border-l border-white/10 flex flex-col">
         <div class="p-6 border-b border-white/10 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white uppercase tracking-tighter">🚀 Keranjang Show</h2>
+            <h2 class="text-xl font-bold text-white uppercase tracking-tighter">🚀 Keranjang</h2>
             <button onclick="toggleCart()" class="text-white hover:text-pink-400 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -129,130 +208,208 @@
             </button>
         </div>
         <div id="cartItems" class="flex-grow overflow-y-auto p-6 space-y-4">
-            <!-- Cart items injected here -->
             <p id="emptyMsg" class="text-gray-400 text-center italic mt-10">Keranjang masih kosong...</p>
         </div>
-        <div class="p-6 bg-black/20 border-t border-white/10">
+        <div class="p-6 bg-black/40 border-t border-white/10">
             <div class="flex justify-between items-center mb-6">
                 <span class="text-gray-300">Total Harga:</span>
                 <span id="cartTotal" class="text-2xl font-bold text-pink-500">Rp 0</span>
             </div>
-            <button onclick="confirmOrder()" class="w-full py-4 cosmic-btn rounded-xl text-white font-bold flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.224-3.92c1.589.944 3.32 1.442 5.087 1.443 5.424 0 9.839-4.416 9.842-9.841.002-2.628-1.024-5.1-2.887-6.963-1.864-1.864-4.332-2.887-6.963-2.889-5.424 0-9.839 4.417-9.842 9.843 0 1.761.472 3.473 1.365 4.981l-.9 3.287 3.364-.883zm12.358-11.884c.147-.073.303-.11.459-.11.23 0 .445.1.589.266.14.161.218.373.218.591 0 .23-.08.449-.227.618l-.547.625-1.071 1.22c-.114.131-.242.251-.382.359l-.027.022c-1.282.97-2.618 1.64-3.992 2.155-.386.145-.772.28-1.157.399l-.055.016c-.22.062-.44.116-.659.163l-.044.01c-.131.027-.262.052-.394.075-.05.008-.101.016-.151.024-.268.041-.537.072-.806.094l-.053.004c-.312.022-.625.034-.938.034-.847 0-1.696-.08-2.541-.24l-.123-.024c-.17-.033-.34-.07-.51-.11l-.106-.026c-.309-.074-.617-.16-.924-.257l-.15-.049c-.27-.089-.538-.186-.805-.294l-.133-.055c-.24-.1-.479-.21-.718-.328l-.138-.071c-.22-.112-.44-.233-.659-.364l-.143-.088c-.198-.124-.395-.257-.591-.4l-.11-.082c-.23-.173-.456-.359-.68-.557l-.066-.059c-.223-.2-.442-.413-.655-.638l-.056-.059c-.208-.225-.409-.46-.605-.708l-.048-.061c-.183-.231-.36-.474-.531-.728l-.039-.061c-.16-.251-.313-.513-.458-.785l-.014-.029c-.14-.265-.268-.541-.383-.827-.015-.038-.03-.075-.045-.113l-.013-.037c-.112-.321-.205-.658-.278-1.01-.01-.053-.018-.106-.027-.16-.073-.432-.109-.884-.109-1.347 0-1.291.288-2.516.853-3.639l.011-.02c.038-.073.076-.146.116-.217l.019-.033c.061-.106.126-.209.192-.31l.012-.019c.1-.15.207-.294.318-.432l.026-.03c.125-.152.257-.298.395-.436l.044-.043c.164-.158.337-.308.516-.45l.03-.022c.189-.148.386-.288.591-.418l.061-.038c.216-.134.441-.258.673-.371l.034-.016c.245-.119.499-.226.759-.321l.07-.025c.34-.124.693-.228 1.055-.31l.136-.03c.33-.074.67-.132 1.014-.173l.23-.026c.321-.035.648-.057.979-.066l.244-.006c.365-.008.735-.003 1.107.016l.169.01c.433.024.87.067 1.309.13l.036.005c.42.061.84.144 1.258.249l.065.017c.394.099.787.218 1.178.358l.081.03c.367.132.731.284 1.092.453l.113.053c.334.159.664.336.989.53l.142.086c.294.178.583.372.868.58l.113.084c.264.195.522.404.774.624l.09.08c.23.204.455.421.674.649l.047.051c.214.221.423.454.624.696l.024.03c.184.221.362.453.533.693l.04.057c.15.215.295.438.432.668l.01.018z" />
-                </svg>
-                Konfirmasi via WhatsApp
+            <button onclick="togglePayment()" class="w-full py-4 cosmic-btn rounded-xl text-white font-bold flex items-center justify-center gap-2 shadow-lg">
+                Pesan & Bayar Sekarang
             </button>
         </div>
     </div>
 
     <script>
-        // Data Show
-        const SHOWS = [
-            { id: 1, title: "Sambil Menggandeng Erat Tanganku", date: "2026-01-25", time: "14:00", lineup: "Alya, Amanda, Delynn, Elin, Ella, Fritzy, Lulu, Lyn, Marsha, Nala, Oline, Raisha", price: 6000 },
-            { id: 2, title: "Pertaruhan Cinta", date: "2026-01-25", time: "19:00", lineup: "Christy, Fiony, Freya, Gita, Gracie, Greesel, Jessi, Lana, Lia, Marsha, Muthe, Olla", price: 6000 },
-            { id: 3, title: "Cara Meminum Ramune", date: "2026-01-29", time: "19:00", lineup: "Anindya, Daisy, Danella, Delynn, Ella, Freya, Gendis, Gita, Greesel, Indah, Lia, Lulu, Muthe, Nachia, Oniel, Ribka", price: 6000 },
-            { id: 4, title: "Pertaruhan Cinta", date: "2026-01-30", time: "19:00", lineup: "Alya, Amanda, Cynthia, Elin, Fiony, Freya, Gendis, Kathrina, Lana, Lyn, Olla, Raisha", price: 6000 },
-            { id: 5, title: "Sambil Menggandeng Erat Tanganku", date: "2026-01-31", time: "16:00", lineup: "Aralie, Cathy, Erine, Gracie, Kimmy, Lia, Lily, Lyn, Marsha, Nachia, Oline, Raisha", price: 6000 },
-            { id: 6, title: "Cara Meminum Ramune", date: "2026-02-01", time: "16:00", lineup: "Chelsea, Christy, Danella, Delynn, Erine, Fritzy, Gita, Gracie, Jessi, Levi, Lily, Michie, Nayla, Oline, Oniel, Trisha", price: 6000 }
-        ];
-
-        let cart = [];
-        const WHATSAPP_NUMBER = "6288809048431";
-
-        // Initializer
-        window.onload = () => {
-            createStars();
-            renderShows();
-            updateCartUI();
+        /**
+         * ==========================================
+         * BAGIAN ADMIN - EDIT JADWAL DI SINI
+         * ==========================================
+         */
+        const CONFIG = {
+            whatsappNumber: "6288809048431",
+            priceRegular: 6000,
+            priceBirthday: 8000,
             
-            // Show guide on first visit
-            if(!localStorage.getItem('guideSeen')) {
-                toggleGuide();
-            }
+            shows: [
+                { 
+                    title: "Pertaruhan Anti Cinta", 
+                    date: "2026-02-05", 
+                    time: "19:00", 
+                    lineup: "Anindya, Christy, Daisy, Danella, Elin, Freya, Gracie, Indah, Lia, Lulu, Marsha, Michie", 
+                    img: "https://thisisucil.my.id/images/PERTARUHAN%20CINTA.jpg", 
+                    isBirthday: false,
+                    memberUlangTahun: "" 
+                },
+                { 
+                    title: "Cara Meminum Ramune", 
+                    date: "2026-02-06", 
+                    time: "19:00", 
+                    lineup: "Cathy, Daisy, Danella, Delynn, Erine, Gita, Jessi, Kathrina, Lia, Lily, Lulu, Muthe, Nala, Oniel, Ribka, Trisha", 
+                    img: "https://thisisucil.my.id/images/RAMUNE.png",
+                    isBirthday: false,
+                    memberUlangTahun: ""
+                },
+                { 
+                    title: "Sambil Menggandeng Erat Tanganku", 
+                    date: "2026-02-07", 
+                    time: "16:00", 
+                    lineup: "Alya, Aralie, Cathy, Eli, Ella, Fritzy, Kimmy, Levi, Lyn, Nachia, Oniel, Raisha", 
+                    img: "https://thisisucil.my.id/images/TWT.jpg",
+                    isBirthday: false,
+                    memberUlangTahun: ""
+                },
+                { 
+                    title: "Cara Meminum Ramune", 
+                    date: "2026-02-08", 
+                    time: "16:00", 
+                    lineup: "Cynthia, Danella, Eli, Fiony, Freya, Fritzy, Gita, Greesel, Jessi, Kathrina, Lana, Lia, Lyn, Nayla, Olla, Oniel", 
+                    img: "https://thisisucil.my.id/images/RAMUNE.png",
+                    isBirthday: true, 
+                    memberUlangTahun: "Fiony"
+                }
+            ]
         };
 
-        function createStars() {
-            const starfield = document.getElementById('starfield');
+        let cart = [];
+
+        window.onload = () => {
+            initCosmicBackground();
+            renderShows();
+            updateCartUI();
+            if(!localStorage.getItem('guideSeen')) toggleGuide();
+        };
+
+        function initCosmicBackground() {
+            const container = document.getElementById('cosmic-bg');
+            if(!container) return;
+
             for(let i=0; i<150; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
-                const size = Math.random() * 3 + 'px';
+                const size = Math.random() * 2.5 + 'px';
                 star.style.width = size;
                 star.style.height = size;
                 star.style.left = Math.random() * 100 + 'vw';
                 star.style.top = Math.random() * 100 + 'vh';
-                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
-                starfield.appendChild(star);
+                star.style.setProperty('--duration', (Math.random() * 3 + 1.5) + 's');
+                container.appendChild(star);
             }
+
+            const planetColors = ['#4ecca3', '#e94560', '#3498db', '#f1c40f', '#9b59b6'];
+            for(let i=0; i<6; i++) {
+                const planet = document.createElement('div');
+                planet.className = 'planet';
+                const size = Math.random() * 40 + 10 + 'px';
+                planet.style.width = size;
+                planet.style.height = size;
+                planet.style.background = `radial-gradient(circle at 30% 30%, ${planetColors[i % planetColors.length]}, #000)`;
+                planet.style.left = Math.random() * 100 + 'vw';
+                planet.style.top = Math.random() * 100 + 'vh';
+                
+                const speed = Math.random() * 60 + 40 + 's';
+                const moveX = (Math.random() - 0.5) * 400 + 'px';
+                const moveY = (Math.random() - 0.5) * 400 + 'px';
+                
+                planet.style.setProperty('--speed', speed);
+                planet.style.setProperty('--moveX', moveX);
+                planet.style.setProperty('--moveY', moveY);
+                
+                container.appendChild(planet);
+            }
+        }
+
+        function handleImgErr(el) {
+            el.onerror = null;
+            const container = el.parentElement;
+            if(container) {
+                container.innerHTML = '<div class="text-[10px] text-gray-500 italic uppercase tracking-widest">Banner N/A</div>';
+            }
+        }
+
+        function isShowActive(showDate, showTime) {
+            const now = new Date();
+            const showStart = new Date(`${showDate}T${showTime}:00`);
+            const expirationTime = new Date(showStart.getTime() + (60 * 60 * 1000));
+            return now < expirationTime;
         }
 
         function renderShows() {
             const grid = document.getElementById('showGrid');
-            const now = new Date();
-            
+            const noShowsMsg = document.getElementById('noShowsMsg');
+            if (!grid) return;
             grid.innerHTML = '';
-            
-            SHOWS.forEach(show => {
-                const showDate = new Date(`${show.date}T${show.time}`);
-                if (showDate < now) return; // Automatic delete if date passed
-
+            let activeCount = 0;
+            CONFIG.shows.forEach((show, index) => {
+                if (!isShowActive(show.date, show.time)) return;
+                activeCount++;
+                const currentPrice = show.isBirthday ? CONFIG.priceBirthday : CONFIG.priceRegular;
                 const card = document.createElement('div');
-                card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full';
+                card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full animate-fade-in relative overflow-hidden';
+                const imageSection = show.img 
+                    ? `<div class="image-container"><img src="${show.img}" alt="${show.title}" onerror="handleImgErr(this)"></div>`
+                    : `<div class="image-container flex-col gap-2">No Poster</div>`;
+                
                 card.innerHTML = `
+                    ${imageSection}
                     <div class="mb-4">
-                        <span class="text-[10px] text-pink-400 font-bold uppercase tracking-widest border border-pink-500/30 px-2 py-1 rounded">Theater Show</span>
+                        <span class="text-[10px] text-pink-400 font-bold uppercase tracking-widest border border-pink-900/30 bg-pink-900/10 px-2 py-1 rounded">Theater Show</span>
                         <h3 class="text-xl font-bold text-white mt-3 leading-tight">${show.title}</h3>
                     </div>
                     
-                    <div class="space-y-2 text-sm text-gray-300 mb-6 flex-grow">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            ${formatDate(show.date)}
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            ${show.time} WIB
-                        </div>
-                        <div class="pt-2 border-t border-white/5 mt-2">
-                            <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Full Line Up</p>
-                            <p class="text-xs italic leading-relaxed text-gray-400">${show.lineup}</p>
+                    <div class="space-y-3 mb-6 flex-grow">
+                        <div class="bg-white/5 rounded-xl p-3 border border-white/5 space-y-3">
+                            ${show.isBirthday ? `<div class="birthday-badge w-full px-3 py-1.5 rounded-lg text-[10px] font-bold text-white flex items-center justify-center gap-2 mb-1">🎂 ULTAH ${show.memberUlangTahun.toUpperCase()}</div>` : ''}
+                            <div class="flex flex-col gap-2.5">
+                                <div class="flex items-center gap-2 text-sm text-gray-200">
+                                    <span class="text-lg">📆</span>
+                                    <span class="font-semibold">${formatDate(show.date)}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-300">
+                                    <span class="text-lg">⏰</span>
+                                    <span>${show.time} WIB</span>
+                                </div>
+                                <!-- Lineup Container (Modified to show all) -->
+                                <div class="flex items-start gap-2 text-[11px] text-gray-400 leading-relaxed pt-1">
+                                    <span class="text-lg leading-none">👥</span>
+                                    <span class="italic whitespace-normal break-words">${show.lineup}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between mt-auto">
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
                         <div>
-                            <p class="text-[10px] text-gray-400">Price per show</p>
-                            <p class="text-lg font-bold text-white">Rp ${show.price.toLocaleString()}</p>
+                            <p class="text-[10px] text-gray-500 uppercase">Harga</p>
+                            <p class="text-xl font-bold text-white tracking-tight">Rp ${currentPrice.toLocaleString()}</p>
                         </div>
-                        <button onclick="addToCart(${show.id})" class="cosmic-btn px-4 py-2 rounded-lg text-white text-xs font-bold hover:scale-105 active:scale-95">
-                            TAMBAH
-                        </button>
-                    </div>
-                `;
+                        <button onclick="addToCart(${index})" class="cosmic-btn px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-lg transform active:scale-95 transition-transform">TAMBAH</button>
+                    </div>`;
                 grid.appendChild(card);
             });
+            if (activeCount === 0) noShowsMsg.classList.remove('hidden'); else noShowsMsg.classList.add('hidden');
         }
 
         function formatDate(dateStr) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateStr).toLocaleDateString('id-ID', options);
+            return new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // Cart Logic
-        function addToCart(showId) {
-            const show = SHOWS.find(s => s.id === showId);
-            if(cart.some(item => item.id === showId)) {
-                showToast("Show sudah ada di keranjang!");
+        function addToCart(index) {
+            const show = CONFIG.shows[index];
+            const uniqueId = `${show.date}-${show.time}`;
+            if(cart.some(item => `${item.date}-${item.time}` === uniqueId)) {
+                showToast("Sudah ada di keranjang!");
                 return;
             }
-            cart.push(show);
+            const price = show.isBirthday ? CONFIG.priceBirthday : CONFIG.priceRegular;
+            cart.push({ ...show, currentPrice: price });
             updateCartUI();
-            showToast("Berhasil ditambahkan ke keranjang!");
+            showToast("Ditambahkan ke keranjang!");
         }
 
-        function removeFromCart(showId) {
-            cart = cart.filter(item => item.id !== showId);
+        function removeFromCart(id) {
+            cart = cart.filter((_, idx) => idx !== id);
             updateCartUI();
         }
 
@@ -260,59 +417,58 @@
             const cartItems = document.getElementById('cartItems');
             const cartCount = document.getElementById('cartCount');
             const cartTotal = document.getElementById('cartTotal');
-            const emptyMsg = document.getElementById('emptyMsg');
-            
-            cartCount.innerText = cart.length;
-            
+            const paymentTotal = document.getElementById('paymentTotal');
+            if (cartCount) cartCount.innerText = cart.length;
             if(cart.length === 0) {
-                cartItems.innerHTML = '<p id="emptyMsg" class="text-gray-400 text-center italic mt-10">Keranjang masih kosong...</p>';
-                cartTotal.innerText = 'Rp 0';
+                if (cartItems) cartItems.innerHTML = '<p class="text-gray-400 text-center italic mt-10">Keranjang masih kosong...</p>';
+                if (cartTotal) cartTotal.innerText = 'Rp 0';
+                if (paymentTotal) paymentTotal.innerText = 'Rp 0';
                 return;
             }
-
             let total = 0;
-            cartItems.innerHTML = '';
-            cart.forEach(item => {
-                total += item.price;
-                const div = document.createElement('div');
-                div.className = 'glass-card p-4 rounded-xl flex justify-between items-center animate-fade-in';
-                div.innerHTML = `
-                    <div>
-                        <h4 class="text-white font-bold text-sm">${item.title}</h4>
-                        <p class="text-[10px] text-pink-400">${item.date} | ${item.time} WIB</p>
-                    </div>
-                    <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                `;
-                cartItems.appendChild(div);
-            });
-            cartTotal.innerText = `Rp ${total.toLocaleString()}`;
+            if (cartItems) {
+                cartItems.innerHTML = '';
+                cart.forEach((item, idx) => {
+                    total += item.currentPrice;
+                    const div = document.createElement('div');
+                    div.className = 'glass-card p-4 rounded-xl flex justify-between items-center mb-3 animate-fade-in';
+                    div.innerHTML = `<div><h4 class="text-white font-bold text-sm">${item.title}</h4><p class="text-[10px] text-pink-400">Rp ${item.currentPrice.toLocaleString()}</p></div><button onclick="removeFromCart(${idx})" class="text-red-400 text-xs font-bold p-2 hover:bg-red-500/10 rounded-lg">HAPUS</button>`;
+                    cartItems.appendChild(div);
+                });
+            }
+            if (cartTotal) cartTotal.innerText = `Rp ${total.toLocaleString()}`;
+            if (paymentTotal) paymentTotal.innerText = `Rp ${total.toLocaleString()}`;
         }
 
-        function confirmOrder() {
+        function togglePayment() {
             if(cart.length === 0) {
-                showToast("Pilih show terlebih dahulu!");
+                showToast("Pilih show dahulu!");
                 return;
             }
+            const modal = document.getElementById('paymentModal');
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+                if (window.innerWidth < 640 && !document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 400);
+            }
+        }
 
-            let message = "*KONFIRMASI PESANAN SHOW JKT48*\n\n";
+        function redirectToWA() {
+            let message = "*KONFIRMASI PEMBAYARAN - JKT48 REALTIME*\n\n";
             cart.forEach((item, index) => {
                 message += `${index + 1}. *${item.title}*\n`;
-                message += `📅 Tanggal: ${item.date}\n`;
-                message += `🕒 Jam: ${item.time} WIB\n`;
-                message += `💸 Harga: Rp ${item.price}\n\n`;
+                message += `📅 ${formatDate(item.date)} | 🕒 ${item.time} WIB\n\n`;
             });
-            
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            message += `*Total Pembayaran: Rp ${total.toLocaleString()}*\n\n`;
-            message += "_Mohon instruksi selanjutnya untuk pembayaran._";
-
-            const encodedMsg = encodeURIComponent(message);
-            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`, '_blank');
+            const total = cart.reduce((sum, item) => sum + item.currentPrice, 0);
+            message += `*Total Transfer: Rp ${total.toLocaleString()}*\n\n`;
+            message += "_Saya sudah melakukan pembayaran via QRIS, berikut bukti transfernya kak._";
+            window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+            togglePayment();
         }
 
-        // UI Handlers
         function toggleGuide() {
             const modal = document.getElementById('guideModal');
             if(modal.classList.contains('hidden')) {
@@ -327,19 +483,18 @@
 
         function toggleCart() {
             const sidebar = document.getElementById('cartSidebar');
-            if(sidebar.classList.contains('translate-x-full')) {
-                sidebar.classList.remove('translate-x-full');
-            } else {
-                sidebar.classList.add('translate-x-full');
-            }
+            sidebar.classList.toggle('translate-x-full');
         }
 
         function showToast(text) {
             const toast = document.createElement('div');
-            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg z-50 animate-bounce';
+            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-pink-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg z-50 animate-fade-in';
             toast.innerText = text;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 400);
+            }, 2000);
         }
     </script>
 </body>
