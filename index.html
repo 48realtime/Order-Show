@@ -174,7 +174,7 @@
 
     <!-- Modal Pembayaran (QRIS) -->
     <div id="paymentModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/95 hidden opacity-0">
-        <div class="glass-card max-w-sm w-full p-6 rounded-3xl text-center text-white shadow-2xl">
+        <div class="glass-card max-sm w-full p-6 rounded-3xl text-center text-white shadow-2xl">
             <h2 class="text-xl font-bold mb-2">QRIS PEMBAYARAN</h2>
             <p class="text-xs text-gray-400 mb-6 uppercase tracking-widest font-semibold italic">Silahkan scan dan simpan bukti transfer</p>
             
@@ -234,40 +234,49 @@
             
             shows: [
                 { 
-                    title: "Pertaruhan Anti Cinta", 
-                    date: "2026-02-05", 
+                    title: "Sambil Menggandeng Erat Tanganku", 
+                    date: "2026-02-12", 
                     time: "19:00", 
-                    lineup: "Anindya, Christy, Daisy, Danella, Elin, Freya, Gracie, Indah, Lia, Lulu, Marsha, Michie", 
-                    img: "https://thisisucil.my.id/images/PERTARUHAN%20CINTA.jpg", 
+                    lineup: "Anindya, Cathy, Danella, Delynn, Elin, Ella, Gendis, Jessi, Lyn, Muthe, Oline, Olla", 
+                    img: "https://thisisucil.my.id/images/TWT.jpg", 
                     isBirthday: false,
                     memberUlangTahun: "" 
                 },
                 { 
-                    title: "Cara Meminum Ramune", 
-                    date: "2026-02-06", 
+                    title: "Pertaruhan Cinta", 
+                    date: "2026-02-13", 
                     time: "19:00", 
-                    lineup: "Cathy, Daisy, Danella, Delynn, Erine, Gita, Jessi, Kathrina, Lia, Lily, Lulu, Muthe, Nala, Oniel, Ribka, Trisha", 
-                    img: "https://thisisucil.my.id/images/RAMUNE.png",
+                    lineup: "Alya, Amanda, Cathy, Cynthia, Gendis, Indah, Kathrina, Lana, Lulu, Lyn, Oniel, Raisha", 
+                    img: "https://thisisucil.my.id/images/PERTARUHAN%20CINTA.jpg",
                     isBirthday: false,
                     memberUlangTahun: ""
                 },
                 { 
                     title: "Sambil Menggandeng Erat Tanganku", 
-                    date: "2026-02-07", 
+                    date: "2026-02-14", 
                     time: "16:00", 
-                    lineup: "Alya, Aralie, Cathy, Eli, Ella, Fritzy, Kimmy, Levi, Lyn, Nachia, Oniel, Raisha", 
+                    lineup: "Aralie, Fiony, Gracie, Kathrina, Levi, Lulu, Marsha, Michie, Nachia, Nayla, Oniel, Ribka", 
                     img: "https://thisisucil.my.id/images/TWT.jpg",
                     isBirthday: false,
                     memberUlangTahun: ""
                 },
                 { 
-                    title: "Cara Meminum Ramune", 
-                    date: "2026-02-08", 
+                    title: "Pertaruhan Cinta", 
+                    date: "2026-02-15", 
                     time: "16:00", 
-                    lineup: "Cynthia, Danella, Eli, Fiony, Freya, Fritzy, Gita, Greesel, Jessi, Kathrina, Lana, Lia, Lyn, Nayla, Olla, Oniel", 
+                    lineup: "Chelsea, Christy, Eli, Fiony, Freya, Fritzy, Gita, Greesel, Jessi, Lia, Muthe, Olla", 
+                    img: "https://thisisucil.my.id/images/PERTARUHAN%20CINTA.jpg",
+                    isBirthday: true, 
+                    memberUlangTahun: "Freya"
+                },
+                { 
+                    title: "Cara Meminum Ramune", 
+                    date: "2026-02-16", 
+                    time: "19:00", 
+                    lineup: "Cathy, Chelsea, Christy, Danella, Eli, Gita, Indah, Kimmy, Lia, Lily, Lyn, Muthe, Nala, Oline, Raisha, Trisha", 
                     img: "https://thisisucil.my.id/images/RAMUNE.png",
                     isBirthday: true, 
-                    memberUlangTahun: "Fiony"
+                    memberUlangTahun: "Trisha"
                 }
             ]
         };
@@ -370,7 +379,7 @@
                                     <span class="text-lg">⏰</span>
                                     <span>${show.time} WIB</span>
                                 </div>
-                                <!-- Lineup Container (Modified to show all) -->
+                                <!-- Lineup Container -->
                                 <div class="flex items-start gap-2 text-[11px] text-gray-400 leading-relaxed pt-1">
                                     <span class="text-lg leading-none">👥</span>
                                     <span class="italic whitespace-normal break-words">${show.lineup}</span>
